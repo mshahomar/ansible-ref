@@ -1,0 +1,17 @@
+---
+
+- name: Sets-up web server
+  hosts: web:!db
+  become: true
+  tasks:
+
+    - name: Update cache, and install Nginx and PHP-FPM packages 
+      package:
+        name:
+          - "{{ nginx_package }}"
+          - "{{ phpfpm_package }}"
+          - "{{ neofetch_package }}"
+        state: latest
+        update_cache: yes
+
+

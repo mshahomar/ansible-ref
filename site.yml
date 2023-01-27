@@ -1,0 +1,63 @@
+---
+
+- name: Set-up ALL servers
+  hosts: all
+  become: true
+  pre_tasks:
+
+    - name: Install updates (CentOS)
+      tags: always
+      dnf:
+        update_only: yes
+        update_cache: yes
+      when: ansible_distribution == "CentOS"
+
+    - name: Install updates (Ubuntu)
+      tags: always
+      apt:
+        upgrade: dist
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+- hosts: web
+  become: true
+  tasks:
+
+    - name: Install Nginx and PHP-FPM packages for Ubuntu
+      tags: nginx,ubuntu
+      apt:
+        name:
+          - nginx 
+          - php-fpm
+        state: latest
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install Nginx and PHP-FPM packages for CentOS 
+      tags: nginx,centos
+      apt:
+        name:
+          - nginx 
+          - php-fpm
+        state: latest
+      when: ansible_distribution == "CentOS"
+
+- hosts: db
+  become: true
+  tasks:
+    - name: Install mariadb package (CentOS)
+      tags: centos,db,mariadb
+      dnf:
+        name:
+          - mariadb
+        state: latest
+      when: ansible_distribution == "CentOS"
+
+    - name: Install mariadb package (Ubuntu)
+      tags: ubuntu,db,mariadb
+      apt:
+        name:
+          - mariadb-server
+        state: latest
+      when: ansible_distribution == "Ubuntu"
+
+
