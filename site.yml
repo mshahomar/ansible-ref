@@ -41,6 +41,16 @@
         state: latest
       when: ansible_distribution == "CentOS"
 
+    - name: Copy default HTML files to Ubuntu web servers
+      tags: nginx,ubuntu
+      copy:
+        src: default_site.html
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: 0644
+
+
 - hosts: db
   become: true
   tasks:
