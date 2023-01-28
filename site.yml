@@ -5,19 +5,47 @@
   become: true
   pre_tasks:
 
-    - name: Install updates (CentOS)
+    - name: update repo cache (CentOS)
       tags: always
       dnf:
-        update_only: yes
         update_cache: yes
+      changed_when: false
       when: ansible_distribution == "CentOS"
 
-    - name: Install updates (Ubuntu)
+    - name: update repo cache (Ubuntu)
       tags: always
       apt:
-        upgrade: dist
         update_cache: yes
+      changed_when: false
       when: ansible_distribution == "Ubuntu"
+
+
+- hosts: all
+  become: true
+  tasks:
+    - name: add ssh key for simone
+      tags: always
+      authorized_key:
+        user: simone
+        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC2lcr3aFQQuwx7OxOURNVoE8FYtSbgeDETt8u/YaLD2UEJuDQdjfGz5AGpEghtfSjj2DKoBS3YjrZDkwEoG52QP7c6HMIecPOb/n6cLu/CKU4yWRj3o+u/vrUdURseHrfn8j4tZy3N2Ky1dWNEYoozHuCPqzOS8NTkAdiX7ZLcWuNosEw4K5o7VdtHylmoAPXjfVzhQKE6wfwvX5Svmp3j6BiP19DalFVDPPIJKJ63wDfpAePUxgYOHIw6bU9mEP9PXQ2dhwz7CwLngULDDHK8OmSg9ETrbeE/GtlaASkgl361EdAQkX8qENHaA5yLKUlcgVJJTDHbpA9RZNlvLBMLrHUpz6IkkgsNFoWCqUMvEloL74UZdTQgmodyoExk4HxJDMc3pSG7kzJsB1lmZqVIv/quVdaqUXyeHT2/qgxLdaISn/y80TR7KaHARLbSlVc9sAm1ooa31vohoZOGHNnfHyQNXwEuq3nIWG87GcLuXSH44kMLF+fnP3tQFBUqhsCc0HQJatNAgjkRmD4StGlyvwW9zePSwRriUEviPUkTI89xT2/aoPncDnSimoDkZyC/kEOlMbEkdTfGgp45jbkloLhCUjHT/PB24TW1BkQ8MJH+8ySJJWB7XpEzFGgTC+El3bUQ3H3buIcPsqg/w3+fex/Ej5L2pvLQBqge4jPZUQ== s1m0n3@ansible"
+
+
+- hosts: workstation
+  become: true
+  tasks:
+    - name: Install unzip
+      package:
+        name: unzip
+
+    - name: Install Terraform 
+      unarchive:
+        src: https://releases.hashicorp.com/terraform/1.3.7/terraform_1.3.7_linux_amd64.zip
+        dest: /usr/local/bin
+        remote_src: yes
+        mode: 0755
+        owner: root
+        group: root
+
 
 - hosts: web
   become: true
@@ -49,6 +77,14 @@
         owner: root
         group: root
         mode: 0644
+
+    - name: Start Nginx (Ubuntu)
+      tags: nginx,ubuntu
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+      when: ansible_distribution == "Ubuntu"
 
 
 - hosts: db
