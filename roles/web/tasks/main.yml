@@ -1,0 +1,34 @@
+- name: Install Nginx and PHP-FPM packages for Ubuntu
+  tags: nginx,ubuntu
+  apt:
+    name:
+      - nginx
+      - php-fpm
+    state: latest
+  when: ansible_distribution == "Ubuntu"
+
+- name: Install Nginx and PHP-FPM packages for CentOS
+  tags: nginx,centos
+  apt:
+    name:
+      - nginx
+      - php-fpm
+    state: latest
+  when: ansible_distribution == "CentOS"
+
+- name: Copy default HTML files to Ubuntu web servers
+  tags: nginx,ubuntu
+  copy:
+    src: default_site.html
+    dest: /var/www/html/index.html
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Start Nginx (Ubuntu)
+  tags: nginx,ubuntu
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+  when: ansible_distribution == "Ubuntu"
